@@ -5,7 +5,7 @@ A dynamic spider by scrapy.
 
 ## Usage
 
-Create a mongodb database named ``spider`` , create a collection named ``rules``. The rule format are just like this:  *(sure, you do not need to known must about the format. I will make an editor later.)*
+Create a mongodb database named ``spider`` , create a collection named ``rules``. The rule format are just like this:  *(sure, you do not need to known much about the format. I will make an editor later.)*
 
 ```json
 {
@@ -51,19 +51,19 @@ run ``python run.py``.
 ## Updated
 
 1. **#2017-04-08#:** support basic dynamic crawl for list and next page.
-2. **#2017-04-08:#** update rule format and note; add pipelines; add re, join in parse. Now you can get data from Mongodb!
+2. **#2017-04-08#:** update rule format and note; add pipelines; add re, join in parse. Now you can get data from Mongodb!
 
 ## Rule Format
 
-| No   | Field     | Descript                                 |
-| :--- | :-------- | :--------------------------------------- |
-| 1    | _id       | rule id                                  |
-| 2    | name      | rule name                                |
-| 3    | start_url | the same as scrapy.Spider                |
-| 4    | next_page | next page xpath                          |
-| 5    | body_list | data(type: list) xpath                   |
-| 6    | meta      | basic info type in directly              |
-| 7    | item_name | item names in scrapy.Item, #source# in #meta#, #bookid# in #re#, #id# in #join# |
-| 8    | xpath     | xpaths to parse, xpath prefix must in #item_name# |
-| 9    | re        | regulation to extract message from scrapy.Item, #reg# for compile, #str_name# for string in scrapy.Item |
-| 10   | join      | join string, #prefix# for #id# string prefix, #join_str# for joint mark, #end_name# for string at the end of #id#, #id# value must in scrapy.Item |
+| No   | Rule Field | Descript                                 |
+| :--- | :--------- | :--------------------------------------- |
+| 1    | _id        | rule id                                  |
+| 2    | name       | rule name                                |
+| 3    | start_url  | the same as scrapy.Spider                |
+| 4    | next_page  | next page xpath                          |
+| 5    | body_list  | data(type: list) xpath                   |
+| 6    | meta       | basic info type in directly              |
+| 7    | item_name  | item names in scrapy.Item, #source# in #meta#, #bookid# in #re#, #id# in #join# |
+| 8    | xpath      | xpaths to parse, xpath prefix must in #item_name# |
+| 9    | re         | regulation to extract message from scrapy.Item, #reg# for compile, #str_name# for string in scrapy.Item |
+| 10   | join       | join string, #prefix# for #id# string prefix, #join_str# for joint mark, #end_name# for string at the end of #id#, #id# value must in scrapy.Item |
