@@ -18,6 +18,7 @@ class DynamicSpider(scrapy.Spider):
         super(DynamicSpider, self).__init__(*args, **kwargs)
         self.DynamicItem = ItemMaker(rule['item_name'])
         self.rule = rule
+        self.pages = 1
 
     def start_requests(self):
         for url in self.rule['start_url']:
@@ -28,6 +29,19 @@ class DynamicSpider(scrapy.Spider):
             )
 
     def parse(self, response):
+        for item in self.parse_step(response):
+            yield item
+
+        # next page
+        next_page = response.xpath(self.rule['next_page'])
+        if next_page and self.pages <= self.rule['max_page']:
+            yield scrapy.Request(
+                next_page.extract()[0],
+                callback=self.parse,
+                dont_filter=True
+            )
+
+    def parse_step(self, response):
         """
         all spider parse will go through the way as:
         1.crawl data from page;(use xpath or css)
@@ -36,6 +50,7 @@ class DynamicSpider(scrapy.Spider):
         :param response: response object.
         :return: yield item or Request object.
         """
+        self.pages += 1
         body_list = response.xpath(self.rule['body_list'])
         for body in body_list:
             item = self.DynamicItem()
@@ -43,7 +58,7 @@ class DynamicSpider(scrapy.Spider):
             item.update(meta)
             # xpath extract
             for name in self.rule['xpath']:
-                item['_'.join(name.split('_')[:-1])] = body.xpath(self.rule['xpath'][name]).extract()[0]
+                item['_'.join(name.split('_')[:-1])] = self.extract(body, name, self.rule, response)
 
             # get message extract
             for key in self.rule['re']:
@@ -57,13 +72,21 @@ class DynamicSpider(scrapy.Spider):
             for key in self.rule['join']:
                 join_dict = self.rule['join'][key]
                 item[key] = join_dict['prefix'] + join_dict['join_str'] + item[join_dict['end_name']]
-
             yield item
 
-        next_page = response.xpath(self.rule['next_page'])
-        if next_page:
-            yield scrapy.Request(
-                next_page.extract()[0],
-                callback=self.parse,
-                dont_filter=True
-            )
+    @staticmethod
+    def extract(parent_element, name, rule, response):
+        """
+        extract by deffrent roles of selector.
+        :param parent_element: parent element
+        :param name: item name
+        :param rule: spider's rule. In this class, use `self.rule`
+        :param response: scrapy response object
+        :return: item value
+        """
+        item_value = ''.join(parent_element.xpath(rule['xpath'][name]['selector']).extract())
+        result = dict(
+            normal=item_value,
+            url=response.urljoin(item_value)
+        )
+        return result[rule['xpath'][name]['role']]
